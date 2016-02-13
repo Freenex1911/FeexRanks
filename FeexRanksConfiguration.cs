@@ -9,6 +9,7 @@ namespace Freenex.FeexRanks
         public bool EnableRankNotification;
         public bool EnableRankNotificationGlobal;
         public bool EnableRankNotificationOnJoin;
+        public bool EnableRankNotificationOnJoinGlobal;
         public string NotificationColor;
         public string NotificationColorGlobal;
         public string NotificationColorPoints;
@@ -23,6 +24,7 @@ namespace Freenex.FeexRanks
             EnableRankNotification = false;
             EnableRankNotificationGlobal = true;
             EnableRankNotificationOnJoin = true;
+            EnableRankNotificationOnJoinGlobal = false;
             NotificationColor = "green";
             NotificationColorGlobal = "green";
             NotificationColorPoints = "green";

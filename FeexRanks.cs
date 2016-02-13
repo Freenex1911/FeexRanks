@@ -22,6 +22,7 @@ namespace Freenex.FeexRanks
                 return new TranslationList(){
                 {"rank_self","Your current rank: {1} with {0} points."},
                 {"rank_other","{2}'s current rank: {1} with {0} points."},
+                {"rank_onjoin","[{1}] {2} ({0} points) connected to the server."},
                 {"rank_reset_player","Your points have been reseted."},
                 {"rank_reset_caller","You have reseted the points of {0}."},
                 {"rank_general_up","You went up: {1} with {0} points."},
@@ -80,6 +81,11 @@ namespace Freenex.FeexRanks
             {
                 int points = FeexRanks.Instance.FeexRanksDatabase.GetPoints(player.CSteamID);
                 UnturnedChat.Say(player, FeexRanks.Instance.Translations.Instance.Translate("rank_self", points, FeexRanks.Instance.GetRank(points).Name), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColor, Color.green));
+            }
+            if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnJoinGlobal)
+            {
+                int points = FeexRanks.Instance.FeexRanksDatabase.GetPoints(player.CSteamID);
+                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("rank_onjoin", points, FeexRanks.Instance.GetRank(points).Name), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColorGlobal, Color.green));
             }
         }
 
