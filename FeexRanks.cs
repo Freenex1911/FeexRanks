@@ -85,7 +85,7 @@ namespace Freenex.FeexRanks
             if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnJoinGlobal)
             {
                 int points = FeexRanks.Instance.FeexRanksDatabase.GetPoints(player.CSteamID);
-                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("rank_onjoin", points, FeexRanks.Instance.GetRank(points).Name), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColorGlobal, Color.green));
+                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("rank_onjoin", points, FeexRanks.Instance.GetRank(points).Name, player.DisplayName), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColorGlobal, Color.green));
             }
         }
 
