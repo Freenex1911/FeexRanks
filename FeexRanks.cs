@@ -57,17 +57,16 @@ namespace Freenex.FeexRanks
         {
             Instance = this;
             FeexRanksDatabase = new DatabaseManager();
-            U.Events.OnPlayerConnected += Events_OnPlayerConnected;
-            UnturnedPlayerEvents.OnPlayerUpdateStat += UnturnedPlayerEvents_OnPlayerUpdateStat; ;
-
             FeexRanks.Instance.Configuration.Instance.Ranks = FeexRanks.Instance.Configuration.Instance.Ranks.OrderByDescending(x => x.Points).ToList();
-
+            U.Events.OnPlayerConnected += Events_OnPlayerConnected;
+            UnturnedPlayerEvents.OnPlayerUpdateStat += UnturnedPlayerEvents_OnPlayerUpdateStat;
             Logger.Log("Freenex's FeexRanks has been loaded!");
         }
 
         protected override void Unload()
         {
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
+            UnturnedPlayerEvents.OnPlayerUpdateStat -= UnturnedPlayerEvents_OnPlayerUpdateStat;
             Logger.Log("Freenex's FeexRanks has been unloaded!");
         }
 

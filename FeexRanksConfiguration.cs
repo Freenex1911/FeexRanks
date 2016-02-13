@@ -48,8 +48,8 @@ namespace Freenex.FeexRanks
             {
                 new classRank() { Points = 0, Name = "Pig"},
                 new classRank() { Points = 100, Name = "Small Zombie", UconomyReward = true, UconomyNotify = true, UconomyAmount = 100},
-                new classRank() { Points = 200, Name = "Zombie", KitReward = true, KitNotify = true, KitName = "zombie"},
-                new classRank() { Points = 500, Name = "Giant Zombie", KitReward = true, KitNotify = true, KitName = "giantzombie", UconomyReward = true, UconomyNotify = false, UconomyAmount = 200},
+                new classRank() { Points = 200, Name = "Zombie", KitReward = true, KitNotify = true, KitName = "Zombie"},
+                new classRank() { Points = 500, Name = "Giant Zombie", KitReward = true, KitNotify = true, KitName = "Giant Zombie", UconomyReward = true, UconomyNotify = false, UconomyAmount = 200},
             };
         }
     }
