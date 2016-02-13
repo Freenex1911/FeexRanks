@@ -1,5 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using Rocket.Core.Logging;
+using Rocket.Unturned.Player;
 using System;
 
 namespace Freenex.FeexRanks
@@ -9,7 +10,8 @@ namespace Freenex.FeexRanks
         internal DatabaseManager()
         {
             new I18N.West.CP1250();
-            CreateCheckSchema();
+            CreateCheckTable();
+            CreateCheckView();
         }
 
         private MySqlConnection CreateConnection()
@@ -27,14 +29,14 @@ namespace Freenex.FeexRanks
             return connection;
         }
 
-        public void AddAccount(Steamworks.CSteamID id)
+        public void AddAccount(UnturnedPlayer player)
         {
             try
             {
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
                 connection.Open();
-                command.CommandText = "INSERT IGNORE INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`) VALUES ('" + id + "')";
+                command.CommandText = "INSERT IGNORE INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES ('" + player.CSteamID.ToString() + "','" + player.DisplayName + "')";
                 command.ExecuteNonQuery();
                 connection.Close();
             }
@@ -51,7 +53,7 @@ namespace Freenex.FeexRanks
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
                 connection.Open();
-                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=" + points + " WHERE `steamId`='" + id + "'";
+                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=" + points.ToString() + " WHERE `steamId`='" + id.ToString() + "'";
                 command.ExecuteNonQuery();
                 connection.Close();
             }
@@ -68,7 +70,7 @@ namespace Freenex.FeexRanks
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
                 connection.Open();
-                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=`points`+" + points + " WHERE `steamId`='" + id + "'";
+                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=`points`+" + points + " WHERE `steamId`='" + id.ToString() + "'";
                 command.ExecuteNonQuery();
                 connection.Close();
             }
@@ -101,18 +103,37 @@ namespace Freenex.FeexRanks
             }
         }
 
-        public int GetPoints(Steamworks.CSteamID id)
+        public void UpdateDisplayName(Steamworks.CSteamID id, string lastDisplayName)
         {
-            int output = 0;
             try
             {
                 MySqlConnection connection = CreateConnection();
-                MySqlCommand command = new MySqlCommand("SELECT * FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` WHERE `steamId` = '" + id.ToString() + "'", connection);
+                MySqlCommand command = connection.CreateCommand();
+                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `lastDisplayName` = '" + lastDisplayName + "' WHERE `steamId` = '" + id.ToString() + "'";
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+        }
+
+        public string[] GetAccountBySteamID(Steamworks.CSteamID id)
+        {
+            string[] output = new string[3];
+            try
+            {
+                MySqlConnection connection = CreateConnection();
+                MySqlCommand command = new MySqlCommand("SELECT * FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` WHERE `steamId` = '" + id.ToString() + "'", connection);
                 connection.Open();
                 MySqlDataReader dataReader = command.ExecuteReader();
                 while (dataReader.Read())
                 {
-                    output = Convert.ToInt16(dataReader["points"]);
+                    output[0] = Convert.ToString(dataReader["points"]);
+                    output[1] = Convert.ToString(dataReader["curPosition"]);
+                    output[2] = Convert.ToString(dataReader["lastDisplayName"]);
                 }
                 dataReader.Close();
                 connection.Close();
@@ -124,7 +145,32 @@ namespace Freenex.FeexRanks
             return output;
         }
 
-        internal void CreateCheckSchema()
+        public string[] GetAccountByPosition(string position)
+        {
+            string[] output = new string[3];
+            try
+            {
+                MySqlConnection connection = CreateConnection();
+                MySqlCommand command = new MySqlCommand("SELECT * FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` WHERE `curPosition` = '" + position + "'", connection);
+                connection.Open();
+                MySqlDataReader dataReader = command.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    output[0] = Convert.ToString(dataReader["points"]);
+                    output[1] = Convert.ToString(dataReader["curPosition"]);
+                    output[2] = Convert.ToString(dataReader["lastDisplayName"]);
+                }
+                dataReader.Close();
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+            return output;
+        }
+
+        internal void CreateCheckTable()
         {
             try
             {
@@ -135,7 +181,7 @@ namespace Freenex.FeexRanks
                 object test = command.ExecuteScalar();
                 if (test == null)
                 {
-                    command.CommandText = "CREATE TABLE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId` VARCHAR(32) NOT NULL, `points` INT(11) NOT NULL DEFAULT '0', `lastUpdated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`steamId`))";
+                    command.CommandText = "CREATE TABLE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId` VARCHAR(32) NOT NULL, `points` INT(11) NOT NULL DEFAULT '0', `lastDisplayName` varchar(32) NOT NULL, `lastUpdated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`steamId`))";
                     command.ExecuteNonQuery();
                 }
                 connection.Close();
@@ -145,5 +191,28 @@ namespace Freenex.FeexRanks
                 Logger.LogException(ex);
             }
         }
+
+        internal void CreateCheckView()
+        {
+            try
+            {
+                MySqlConnection connection = CreateConnection();
+                MySqlCommand command = connection.CreateCommand();
+                connection.Open();
+                command.CommandText = "SHOW FULL TABLES LIKE '" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "'";
+                object test = command.ExecuteScalar();
+                if (test == null)
+                {
+                    command.CommandText = "CREATE VIEW `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` AS SELECT steamId, points, lastDisplayName, (select count(1) FROM " + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + " b WHERE  b.points > a.points) + 1 AS curPosition FROM " + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + " AS a";
+                    command.ExecuteNonQuery();
+                }
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+        }
+
     }
 }

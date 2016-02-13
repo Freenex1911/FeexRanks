@@ -95,6 +95,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandList.cs" />
     <Compile Include="CommandRank.cs" />
     <Compile Include="FeexRanksDatabase.cs" />
     <Compile Include="FeexRanksConfiguration.cs" />

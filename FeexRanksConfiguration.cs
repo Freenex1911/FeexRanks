@@ -12,7 +12,6 @@ namespace Freenex.FeexRanks
         public bool EnableRankNotificationOnJoinGlobal;
         public string NotificationColor;
         public string NotificationColorGlobal;
-        public string NotificationColorPoints;
         public classDatabase FeexRanksDatabase;
         [XmlArrayItem(ElementName = "PointsEvent")]
         public List<classPoints> Points;
@@ -27,7 +26,6 @@ namespace Freenex.FeexRanks
             EnableRankNotificationOnJoinGlobal = false;
             NotificationColor = "green";
             NotificationColorGlobal = "green";
-            NotificationColorPoints = "green";
 
             FeexRanksDatabase = new classDatabase()
             {
@@ -36,6 +34,7 @@ namespace Freenex.FeexRanks
                 DatabasePassword = "password",
                 DatabaseName = "unturned",
                 DatabaseTableName = "ranks",
+                DatabaseViewName = "ranks_view",
                 DatabasePort = 3306
             };
 
@@ -85,6 +84,7 @@ namespace Freenex.FeexRanks
         public string DatabasePassword;
         public string DatabaseName;
         public string DatabaseTableName;
+        public string DatabaseViewName;
         public int DatabasePort;
     }
 }

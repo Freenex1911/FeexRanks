@@ -2,6 +2,7 @@
 using Rocket.Core.Logging;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace Freenex.FeexRanks
         }
         public string Help
         {
-            get { return "View or reset ranks"; }
+            get { return "View or reset rank"; }
         }
 
         public string Syntax
@@ -40,8 +41,7 @@ namespace Freenex.FeexRanks
                 return new List<string>()
                 {
                     "rank",
-                    "rank.other",
-                    "rank.reset"
+                    "rank.other"
                 };
             }
         }
@@ -53,8 +53,8 @@ namespace Freenex.FeexRanks
 
             if (command.Length == 0 && caller is ConsolePlayer == false)
             {
-                int points = FeexRanks.Instance.FeexRanksDatabase.GetPoints(callerPlayer.CSteamID);
-                UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("rank_self", points, FeexRanks.Instance.GetRank(points).Name), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColor, Color.green));
+                string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(callerPlayer.CSteamID);
+                UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("rank_self", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetRankName(Convert.ToInt16(rankInfo[0])).Name), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColor, Color.green));
             }
             else if (command.Length == 1 && (caller is ConsolePlayer || callerPlayer.HasPermission("rank.other")))
             {
@@ -66,9 +66,9 @@ namespace Freenex.FeexRanks
                 }
                 else
                 {
-                    int points = FeexRanks.Instance.FeexRanksDatabase.GetPoints(otherPlayer.CSteamID);
-                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("rank_other", points, FeexRanks.Instance.GetRank(points).Name, otherPlayer.DisplayName)); }
-                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("rank_other", points, FeexRanks.Instance.GetRank(points).Name, otherPlayer.DisplayName), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColor, Color.green)); }
+                    string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(callerPlayer.CSteamID);
+                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("rank_other", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetRankName(Convert.ToInt16(rankInfo[0])).Name, otherPlayer.DisplayName)); }
+                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("rank_other", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetRankName(Convert.ToInt16(rankInfo[0])).Name, otherPlayer.DisplayName), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColor, Color.green)); }
                 }
             }
             else if (command.Length == 2 && (caller is ConsolePlayer || callerPlayer.HasPermission("rank.reset") && command[1] == "reset"))
@@ -89,7 +89,7 @@ namespace Freenex.FeexRanks
             }
             else
             {
-                UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("rank_general_invalid_parameter"));
+                UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("rank_general_invalid_parameter"), UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColor, Color.green));
             }
         }
 
