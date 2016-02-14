@@ -6,8 +6,8 @@ namespace Freenex.FeexRanks
 {
     public class FeexRanksConfiguration : IRocketPluginConfiguration
     {
-        public bool EnableRankNotification;
-        public bool EnableRankNotificationGlobal;
+        public bool EnableLevelUpNotification;
+        public bool EnableLevelUpNotificationGlobal;
         public bool EnableRankNotificationOnJoin;
         public bool EnableRankNotificationOnJoinGlobal;
         public string NotificationColor;
@@ -20,8 +20,8 @@ namespace Freenex.FeexRanks
 
         public void LoadDefaults()
         {
-            EnableRankNotification = false;
-            EnableRankNotificationGlobal = true;
+            EnableLevelUpNotification = false;
+            EnableLevelUpNotificationGlobal = true;
             EnableRankNotificationOnJoin = true;
             EnableRankNotificationOnJoinGlobal = false;
             NotificationColor = "Green";
@@ -55,6 +55,25 @@ namespace Freenex.FeexRanks
         }
     }
 
+    public class classDatabase
+    {
+        public string DatabaseAddress;
+        public string DatabaseUsername;
+        public string DatabasePassword;
+        public string DatabaseName;
+        public string DatabaseTableName;
+        public string DatabaseViewName;
+        public int DatabasePort;
+    }
+
+    public class classEvent
+    {
+        public classEvent() { }
+        public string EventName;
+        public bool Notify;
+        public int Points;
+    }
+
     public class classLevel
     {
         public classLevel() { }
@@ -66,24 +85,5 @@ namespace Freenex.FeexRanks
         public bool UconomyReward = false;
         public bool UconomyNotify = true;
         public decimal UconomyAmount = 0;
-    }
-
-    public class classEvent
-    {
-        public classEvent() { }
-        public string EventName;
-        public bool Notify;
-        public int Points;
-    }
-
-    public class classDatabase
-    {
-        public string DatabaseAddress;
-        public string DatabaseUsername;
-        public string DatabasePassword;
-        public string DatabaseName;
-        public string DatabaseTableName;
-        public string DatabaseViewName;
-        public int DatabasePort;
     }
 }

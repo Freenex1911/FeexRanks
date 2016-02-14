@@ -3,6 +3,7 @@ using Rocket.Core.Logging;
 using Rocket.Unturned.Player;
 using Steamworks;
 using System;
+using System.Collections.Generic;
 
 namespace Freenex.FeexRanks
 {
@@ -187,6 +188,32 @@ namespace Freenex.FeexRanks
                 Logger.LogException(ex);
             }
             return output;
+        }
+
+        public string[] GetTopRanks(string limit)
+        {
+            string[] output;
+            List<string> listOutput = new List<string>();
+            try
+            {
+                MySqlConnection connection = CreateConnection();
+                MySqlCommand command = new MySqlCommand("SELECT * FROM (SELECT * FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` WHERE `points` ORDER BY `points` DESC LIMIT " + limit + ") AS tbl ORDER BY `points` ASC", connection);
+                connection.Open();
+                MySqlDataReader dataReader = command.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    listOutput.Add(Convert.ToString(dataReader["points"]));
+                    listOutput.Add(Convert.ToString(dataReader["currentRank"]));
+                    listOutput.Add(Convert.ToString(dataReader["lastDisplayName"]));
+                }
+                dataReader.Close();
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+            return output = listOutput.ToArray();
         }
 
         internal void CreateCheckTable()

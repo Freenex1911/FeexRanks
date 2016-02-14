@@ -131,22 +131,30 @@ namespace Freenex.FeexRanks
 
             if (configLevelOld.Name != configLevelNew.Name)
             {
-                if (FeexRanks.Instance.Configuration.Instance.EnableRankNotification)
+                if (FeexRanks.Instance.Configuration.Instance.EnableLevelUpNotification)
                 {
                     UnturnedChat.Say(player, Translate("level_up", newPoints, configLevelNew.Name), configNotificationColor);
                 }
-                if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationGlobal)
+                if (FeexRanks.Instance.Configuration.Instance.EnableLevelUpNotificationGlobal)
                 {
                     UnturnedChat.Say(Translate("level_up_global", newPoints, configLevelNew.Name, player.DisplayName), configNotificationColorGlobal);
                 }
 
                 if (configLevelNew.KitReward)
                 {
-                    KitReward(configLevelNew, player);
+                    try
+                    {
+                        KitReward(configLevelNew, player);
+                    }
+                    catch { }
                 }
                 if (configLevelNew.UconomyReward)
                 {
-                    UconomyReward(configLevelNew, player);
+                    try
+                    {
+                        UconomyReward(configLevelNew, player);
+                    }
+                    catch { }
                 }
             }
         }
@@ -165,20 +173,20 @@ namespace Freenex.FeexRanks
 
         private void KitReward(classLevel configLevel, UnturnedPlayer player)
         {
-            fr34kyn01535.Kits.Kit kit = fr34kyn01535.Kits.Kits.Instance.Configuration.Instance.Kits.Where(k => k.Name.ToLower() == configLevel.KitName.ToLower()).FirstOrDefault();
-            if (kit == null)
+            fr34kyn01535.Kits.Kit rewardKit = fr34kyn01535.Kits.Kits.Instance.Configuration.Instance.Kits.Where(k => k.Name.ToLower() == configLevel.KitName.ToLower()).FirstOrDefault();
+            if (rewardKit == null)
             {
                 Logger.LogWarning("Kit " + configLevel.KitName + " not found.");
                 return;
             }
-            foreach (fr34kyn01535.Kits.KitItem item in kit.Items)
+            foreach (fr34kyn01535.Kits.KitItem item in rewardKit.Items)
             {
                 if (!player.GiveItem(item.ItemId, item.Amount))
                 {
                     Logger.Log(string.Format("Failed giving a item to {0} ({1}, {2})", player.CharacterName, item.ItemId, item.Amount));
                 }
             }
-            player.Experience += kit.XP;
+            player.Experience += rewardKit.XP;
 
             if (configLevel.KitNotify)
             {
