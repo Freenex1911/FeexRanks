@@ -13,10 +13,10 @@ namespace Freenex.FeexRanks
         public string NotificationColor;
         public string NotificationColorGlobal;
         public classDatabase FeexRanksDatabase;
-        [XmlArrayItem(ElementName = "PointsEvent")]
-        public List<classPoints> Points;
-        [XmlArrayItem(ElementName = "Rank")]
-        public List<classRank> Ranks;
+        [XmlArrayItem(ElementName = "Event")]
+        public List<classEvent> Events;
+        [XmlArrayItem(ElementName = "Level")]
+        public List<classLevel> Level;
 
         public void LoadDefaults()
         {
@@ -24,8 +24,8 @@ namespace Freenex.FeexRanks
             EnableRankNotificationGlobal = true;
             EnableRankNotificationOnJoin = true;
             EnableRankNotificationOnJoinGlobal = false;
-            NotificationColor = "green";
-            NotificationColorGlobal = "green";
+            NotificationColor = "Green";
+            NotificationColorGlobal = "Gray";
 
             FeexRanksDatabase = new classDatabase()
             {
@@ -38,29 +38,28 @@ namespace Freenex.FeexRanks
                 DatabasePort = 3306
             };
 
-            Points = new List<classPoints>()
+            Events = new List<classEvent>()
             {
-                new classPoints { EventName = "KILLS_PLAYERS", Notify = true, Points = 60 },
-                new classPoints { EventName = "KILLS_ZOMBIES_MEGA", Notify = true, Points = 50 },
-                new classPoints { EventName = "KILLS_ZOMBIES_NORMAL", Notify = false, Points = 10 },
+                new classEvent { EventName = "KILLS_ZOMBIES_NORMAL", Notify = false, Points = 10 },
+                new classEvent { EventName = "KILLS_ZOMBIES_MEGA", Notify = true, Points = 50 },
+                new classEvent { EventName = "KILLS_PLAYERS", Notify = true, Points = 60 }
             };
 
-            Ranks = new List<classRank>()
+            Level = new List<classLevel>()
             {
-                new classRank() { Points = 0, Name = "Pig"},
-                new classRank() { Points = 100, Name = "Small Zombie", UconomyReward = true, UconomyNotify = true, UconomyAmount = 100},
-                new classRank() { Points = 200, Name = "Zombie", KitReward = true, KitNotify = true, KitName = "Zombie"},
-                new classRank() { Points = 500, Name = "Giant Zombie", KitReward = true, KitNotify = true, KitName = "Giant Zombie", UconomyReward = true, UconomyNotify = false, UconomyAmount = 200},
+                new classLevel() { Points = 0, Name = "Pig"},
+                new classLevel() { Points = 100, Name = "Small Zombie", UconomyReward = true, UconomyNotify = true, UconomyAmount = 100},
+                new classLevel() { Points = 200, Name = "Zombie", KitReward = true, KitNotify = true, KitName = "Zombie"},
+                new classLevel() { Points = 500, Name = "Giant Zombie", KitReward = true, KitNotify = true, KitName = "Giant Zombie", UconomyReward = true, UconomyNotify = false, UconomyAmount = 200}
             };
         }
     }
 
-    public class classRank
+    public class classLevel
     {
-        public classRank() { }
-
-        public int Points;
-        public string Name;
+        public classLevel() { }
+        public int Points = 0;
+        public string Name = string.Empty;
         public bool KitReward = false;
         public bool KitNotify = true;
         public string KitName = string.Empty;
@@ -69,9 +68,9 @@ namespace Freenex.FeexRanks
         public decimal UconomyAmount = 0;
     }
 
-    public class classPoints
+    public class classEvent
     {
-        public classPoints() { }
+        public classEvent() { }
         public string EventName;
         public bool Notify;
         public int Points;
