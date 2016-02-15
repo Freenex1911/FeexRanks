@@ -197,7 +197,7 @@ namespace Freenex.FeexRanks
             try
             {
                 MySqlConnection connection = CreateConnection();
-                MySqlCommand command = new MySqlCommand("SELECT * FROM (SELECT * FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` WHERE `points` ORDER BY `points` DESC LIMIT " + limit + ") AS tbl ORDER BY `points` ASC", connection);
+                MySqlCommand command = new MySqlCommand("SELECT * FROM (SELECT * FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` WHERE `currentRank` ORDER BY `currentRank` DESC LIMIT " + limit + ") AS tbl ORDER BY `currentRank` ASC", connection);
                 connection.Open();
                 MySqlDataReader dataReader = command.ExecuteReader();
                 while (dataReader.Read())

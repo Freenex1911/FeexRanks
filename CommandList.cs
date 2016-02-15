@@ -53,17 +53,15 @@ namespace Freenex.FeexRanks
                 string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetTopRanks("3");
                 UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_1"), FeexRanks.Instance.configNotificationColor);
 
-                if (rankInfo[0] != null)
+                if (rankInfo.Length > 0)
                 {
                     UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_2", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, rankInfo[2]), FeexRanks.Instance.configNotificationColor);
                 }
-                rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountByRank("2");
-                if (rankInfo[3] != null)
+                if (rankInfo.Length > 3)
                 {
                     UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_3", rankInfo[3], rankInfo[4], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[3])).Name, rankInfo[5]), FeexRanks.Instance.configNotificationColor);
                 }
-                rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountByRank("3");
-                if (rankInfo[6] != null)
+                if (rankInfo.Length > 6)
                 {
                     UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_4", rankInfo[6], rankInfo[7], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[6])).Name, rankInfo[8]), FeexRanks.Instance.configNotificationColor);
                 }
