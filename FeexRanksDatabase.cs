@@ -49,14 +49,14 @@ namespace Freenex.FeexRanks
             return connection;
         }
 
-        public void AddAccount(UnturnedPlayer player)
+        public void AddAccount(CSteamID id, string lastDisplayName)
         {
             try
             {
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
                 connection.Open();
-                command.CommandText = "INSERT IGNORE INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES ('" + player.CSteamID.ToString() + "','" + player.DisplayName + "')";
+                command.CommandText = "INSERT IGNORE INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES ('" + id.ToString() + "','" + lastDisplayName + "')";
                 command.ExecuteNonQuery();
                 connection.Close();
             }

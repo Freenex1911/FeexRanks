@@ -17,6 +17,7 @@ namespace Freenex.FeexRanks
         public static FeexRanks Instance;
         public Color configNotificationColor;
         public Color configNotificationColorGlobal;
+        public Color configNotificationColorJoinLeaveGlobal;
 
         public override TranslationList DefaultTranslations
         {
@@ -34,10 +35,11 @@ namespace Freenex.FeexRanks
                 {"list_search","Rank {1}: [{2}] {3} ({0} points)"},
                 {"list_search_not_found","Rank not found."},
                 {"level_up","You went up: {1} with {0} points."},
-                {"level_up_kit","You went up and reveiced the kit {0}."},
+                {"level_up_kit","You went up and received the kit {0}."},
                 {"level_up_uconomy","You went up and received {0}."},
                 {"level_up_global","{2} went up: {1} with {0} points."},
                 {"general_onjoin","[{2}] {3} ({0} points, rank {1}) connected to the server."},
+                {"general_onleave","[{2}] {3} ({0} points, rank {1}) disconnected from the server."},
                 {"general_not_found","Player not found."},
                 {"general_invalid_parameter","Invalid parameter."},
                 {"event_ACCURACY","You received {0} points."},
@@ -71,8 +73,10 @@ namespace Freenex.FeexRanks
             FeexRanks.Instance.Configuration.Instance.Level = FeexRanks.Instance.Configuration.Instance.Level.OrderByDescending(x => x.Points).ToList();
             configNotificationColor = UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColor, Color.green);
             configNotificationColorGlobal = UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColorGlobal, Color.green);
+            configNotificationColorJoinLeaveGlobal = UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColorJoinLeaveGlobal, Color.green);
 
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
+            U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat += UnturnedPlayerEvents_OnPlayerUpdateStat;
 
             Logger.Log("Freenex's FeexRanks has been loaded!");
@@ -81,6 +85,7 @@ namespace Freenex.FeexRanks
         protected override void Unload()
         {
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
+            U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat -= UnturnedPlayerEvents_OnPlayerUpdateStat;
 
             Logger.Log("Freenex's FeexRanks has been unloaded!");
@@ -94,7 +99,7 @@ namespace Freenex.FeexRanks
             }
             else
             {
-                FeexRanks.Instance.FeexRanksDatabase.AddAccount(player);
+                FeexRanks.Instance.FeexRanksDatabase.AddAccount(player.CSteamID, player.DisplayName);
             }
 
             if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnJoin)
@@ -105,7 +110,16 @@ namespace Freenex.FeexRanks
             if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnJoinGlobal)
             {
                 string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID);
-                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("general_onjoin", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, player.DisplayName), configNotificationColorGlobal);
+                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("general_onjoin", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, player.DisplayName), configNotificationColorJoinLeaveGlobal);
+            }
+        }
+
+        private void Events_OnPlayerDisconnected(UnturnedPlayer player)
+        {
+            if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnLeaveGlobal)
+            {
+                string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID);
+                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("general_onleave", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, player.DisplayName), configNotificationColorJoinLeaveGlobal);
             }
         }
 
@@ -126,7 +140,7 @@ namespace Freenex.FeexRanks
         {
             classLevel configLevelOld = GetLevel(Convert.ToInt16(FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID)[0]));
             FeexRanks.Instance.FeexRanksDatabase.UpdateAccount(player.CSteamID, points);
-            int newPoints = Convert.ToInt16(FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID)[0]);
+            int newPoints = configLevelOld.Points + points;
             classLevel configLevelNew = GetLevel(newPoints);
 
             if (configLevelOld.Name != configLevelNew.Name)

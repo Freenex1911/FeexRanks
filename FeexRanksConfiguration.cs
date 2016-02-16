@@ -10,8 +10,10 @@ namespace Freenex.FeexRanks
         public bool EnableLevelUpNotificationGlobal;
         public bool EnableRankNotificationOnJoin;
         public bool EnableRankNotificationOnJoinGlobal;
+        public bool EnableRankNotificationOnLeaveGlobal;
         public string NotificationColor;
         public string NotificationColorGlobal;
+        public string NotificationColorJoinLeaveGlobal;
         public classDatabase FeexRanksDatabase;
         [XmlArrayItem(ElementName = "Event")]
         public List<classEvent> Events;
@@ -24,8 +26,10 @@ namespace Freenex.FeexRanks
             EnableLevelUpNotificationGlobal = true;
             EnableRankNotificationOnJoin = true;
             EnableRankNotificationOnJoinGlobal = false;
+            EnableRankNotificationOnLeaveGlobal = false;
             NotificationColor = "Green";
             NotificationColorGlobal = "Gray";
+            NotificationColorJoinLeaveGlobal = "Green";
 
             FeexRanksDatabase = new classDatabase()
             {
