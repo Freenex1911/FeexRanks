@@ -1,6 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
 using Rocket.Core.Logging;
-using Rocket.Unturned.Player;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -55,8 +54,9 @@ namespace Freenex.FeexRanks
             {
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
+                command.CommandText = "INSERT IGNORE INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES ('" + id.ToString() + "',@lastDisplayName)";
+                command.Parameters.AddWithValue("@lastDisplayName", lastDisplayName);
                 connection.Open();
-                command.CommandText = "INSERT IGNORE INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES ('" + id.ToString() + "','" + lastDisplayName + "')";
                 command.ExecuteNonQuery();
                 connection.Close();
             }
@@ -72,8 +72,8 @@ namespace Freenex.FeexRanks
             {
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
-                connection.Open();
                 command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=`points`+" + points + " WHERE `steamId`='" + id.ToString() + "'";
+                connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
             }
@@ -89,8 +89,8 @@ namespace Freenex.FeexRanks
             {
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
-                connection.Open();
                 command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=" + points.ToString() + " WHERE `steamId`='" + id.ToString() + "'";
+                connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
             }
@@ -106,9 +106,9 @@ namespace Freenex.FeexRanks
             {
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
+                command.CommandText = "SELECT COUNT(1) FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` WHERE `steamId` = '" + id.ToString() + "'";
                 int exists = 0;
                 connection.Open();
-                command.CommandText = "SELECT COUNT(1) FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` WHERE `steamId` = '" + id.ToString() + "'";
                 object result = command.ExecuteScalar();
                 if (result != null) Int32.TryParse(result.ToString(), out exists);
                 connection.Close();
@@ -129,7 +129,8 @@ namespace Freenex.FeexRanks
             {
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `lastDisplayName` = '" + lastDisplayName + "' WHERE `steamId` = '" + id.ToString() + "'";
+                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `lastDisplayName` = @lastDisplayName WHERE `steamId` = '" + id.ToString() + "'";
+                command.Parameters.AddWithValue("@lastDisplayName", lastDisplayName);
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -171,7 +172,8 @@ namespace Freenex.FeexRanks
             try
             {
                 MySqlConnection connection = CreateConnection();
-                MySqlCommand command = new MySqlCommand("SELECT * FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` WHERE `currentRank` = '" + rank + "'", connection);
+                MySqlCommand command = new MySqlCommand("SELECT * FROM `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` WHERE `currentRank` = @rank", connection);
+                command.Parameters.AddWithValue("@rank", rank);
                 connection.Open();
                 MySqlDataReader dataReader = command.ExecuteReader();
                 while (dataReader.Read())
