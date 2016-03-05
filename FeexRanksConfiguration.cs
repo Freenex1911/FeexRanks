@@ -39,7 +39,8 @@ namespace Freenex.FeexRanks
                 DatabaseName = "unturned",
                 DatabaseTableName = "ranks",
                 DatabaseViewName = "ranks_view",
-                DatabasePort = 3306
+                DatabasePort = 3306,
+                QueryInterval = 10
             };
 
             Events = new List<classEvent>()
@@ -68,6 +69,7 @@ namespace Freenex.FeexRanks
         public string DatabaseTableName;
         public string DatabaseViewName;
         public int DatabasePort;
+        public int QueryInterval;
     }
 
     public class classEvent

@@ -6,6 +6,7 @@ using Rocket.Unturned.Chat;
 using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -15,9 +16,12 @@ namespace Freenex.FeexRanks
     {
         public DatabaseManager FeexRanksDatabase;
         public static FeexRanks Instance;
+        public static Dictionary<Steamworks.CSteamID, int> dicPoints = new Dictionary<Steamworks.CSteamID, int>();
         public Color configNotificationColor;
         public Color configNotificationColorGlobal;
         public Color configNotificationColorJoinLeaveGlobal;
+
+        private DateTime? lastQuery = DateTime.Now;
 
         public override TranslationList DefaultTranslations
         {
@@ -74,7 +78,7 @@ namespace Freenex.FeexRanks
             configNotificationColor = UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColor, Color.green);
             configNotificationColorGlobal = UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColorGlobal, Color.green);
             configNotificationColorJoinLeaveGlobal = UnturnedChat.GetColorFromName(FeexRanks.Instance.Configuration.Instance.NotificationColorJoinLeaveGlobal, Color.green);
-
+            
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat += UnturnedPlayerEvents_OnPlayerUpdateStat;
@@ -84,6 +88,12 @@ namespace Freenex.FeexRanks
 
         protected override void Unload()
         {
+            if (dicPoints.Count != 0)
+            {
+                FeexRanks.Instance.FeexRanksDatabase.SetPointsQuery(dicPoints);
+                dicPoints.Clear();
+            }
+
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat -= UnturnedPlayerEvents_OnPlayerUpdateStat;
@@ -91,35 +101,46 @@ namespace Freenex.FeexRanks
             Logger.Log("Freenex's FeexRanks has been unloaded!");
         }
 
+        void FixedUpdate()
+        {
+            if (State == Rocket.API.PluginState.Loaded && ((DateTime.Now - lastQuery.Value).TotalSeconds > Configuration.Instance.FeexRanksDatabase.QueryInterval))
+            {
+                if (dicPoints.Count != 0)
+                {
+                    FeexRanks.Instance.FeexRanksDatabase.SetPointsQuery(dicPoints);
+                }
+                lastQuery = DateTime.Now;
+            }
+        }
+
         private void Events_OnPlayerConnected(UnturnedPlayer player)
         {
-            if (FeexRanks.Instance.FeexRanksDatabase.CheckAccount(player.CSteamID))
-            {
-                FeexRanks.Instance.FeexRanksDatabase.UpdateDisplayName(player.CSteamID, player.DisplayName);
-            }
-            else
-            {
-                FeexRanks.Instance.FeexRanksDatabase.AddAccount(player.CSteamID, player.DisplayName);
-            }
+            FeexRanks.Instance.FeexRanksDatabase.AddUpdatePlayer(player.CSteamID.ToString(), player.DisplayName);
+            string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID.ToString());
+            dicPoints.Add(player.CSteamID, Convert.ToUInt16(rankInfo[0]));
 
             if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnJoin)
             {
-                string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID);
                 UnturnedChat.Say(player, FeexRanks.Instance.Translations.Instance.Translate("rank_self", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name), configNotificationColor);
             }
             if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnJoinGlobal)
             {
-                string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID);
                 UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("general_onjoin", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, player.DisplayName), configNotificationColorJoinLeaveGlobal);
             }
         }
 
         private void Events_OnPlayerDisconnected(UnturnedPlayer player)
         {
+            int playerPoints;
+            bool playerExists = dicPoints.TryGetValue(player.CSteamID, out playerPoints);
+            if (playerExists)
+            {
+                dicPoints.Remove(player.CSteamID);
+            }
+
             if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnLeaveGlobal)
             {
-                string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID);
-                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("general_onleave", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, player.DisplayName), configNotificationColorJoinLeaveGlobal);
+                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("general_onleave", playerPoints, FeexRanks.Instance.FeexRanksDatabase.GetRankBySteamID(player.CSteamID.ToString()), FeexRanks.Instance.GetLevel(playerPoints).Name, player.DisplayName), configNotificationColorJoinLeaveGlobal);
             }
         }
 
@@ -128,47 +149,54 @@ namespace Freenex.FeexRanks
             classEvent configEvent = FeexRanks.Instance.Configuration.Instance.Events.Find(x => x.EventName == stat.ToString());
             if (configEvent != null)
             {
-                UpdatePoints(player, configEvent.Points);
                 if (configEvent.Notify)
                 {
                     UnturnedChat.Say(player, Translate("event_" + configEvent.EventName, configEvent.Points), configNotificationColor);
                 }
+                UpdatePoints(player, configEvent.Points);
             }
         }
 
-        public void UpdatePoints (UnturnedPlayer player, int points)
+        public void UpdatePoints(UnturnedPlayer player, int points)
         {
-            classLevel configLevelOld = GetLevel(Convert.ToInt16(FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID)[0]));
-            FeexRanks.Instance.FeexRanksDatabase.UpdateAccount(player.CSteamID, points);
-            int newPoints = configLevelOld.Points + points;
-            classLevel configLevelNew = GetLevel(newPoints);
+            int oldPoints;
+            bool playerExists = dicPoints.TryGetValue(player.CSteamID, out oldPoints);
 
-            if (configLevelOld.Name != configLevelNew.Name)
+            if (playerExists)
             {
-                if (FeexRanks.Instance.Configuration.Instance.EnableLevelUpNotification)
-                {
-                    UnturnedChat.Say(player, Translate("level_up", newPoints, configLevelNew.Name), configNotificationColor);
-                }
-                if (FeexRanks.Instance.Configuration.Instance.EnableLevelUpNotificationGlobal)
-                {
-                    UnturnedChat.Say(Translate("level_up_global", newPoints, configLevelNew.Name, player.DisplayName), configNotificationColorGlobal);
-                }
+                dicPoints[player.CSteamID] += points;
 
-                if (configLevelNew.KitReward)
+                int newPoints = oldPoints + points;
+                classLevel configLevelOld = GetLevel(oldPoints);
+                classLevel configLevelNew = GetLevel(newPoints);
+
+                if (configLevelOld.Name != configLevelNew.Name)
                 {
-                    try
+                    if (FeexRanks.Instance.Configuration.Instance.EnableLevelUpNotification)
                     {
-                        KitReward(configLevelNew, player);
+                        UnturnedChat.Say(player, Translate("level_up", newPoints, configLevelNew.Name), configNotificationColor);
                     }
-                    catch { }
-                }
-                if (configLevelNew.UconomyReward)
-                {
-                    try
+                    if (FeexRanks.Instance.Configuration.Instance.EnableLevelUpNotificationGlobal)
                     {
-                        UconomyReward(configLevelNew, player);
+                        UnturnedChat.Say(Translate("level_up_global", newPoints, configLevelNew.Name, player.DisplayName), configNotificationColorGlobal);
                     }
-                    catch { }
+
+                    if (configLevelNew.KitReward)
+                    {
+                        try
+                        {
+                            KitReward(configLevelNew, player);
+                        }
+                        catch { }
+                    }
+                    if (configLevelNew.UconomyReward)
+                    {
+                        try
+                        {
+                            UconomyReward(configLevelNew, player);
+                        }
+                        catch { }
+                    }
                 }
             }
         }
@@ -200,7 +228,7 @@ namespace Freenex.FeexRanks
                     Logger.Log(string.Format("Failed giving a item to {0} ({1}, {2})", player.CharacterName, item.ItemId, item.Amount));
                 }
             }
-            player.Experience += rewardKit.XP;
+            player.Experience += rewardKit.XP.Value;
 
             if (configLevel.KitNotify)
             {
