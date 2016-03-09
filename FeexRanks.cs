@@ -46,25 +46,25 @@ namespace Freenex.FeexRanks
                 {"general_onleave","[{2}] {3} ({0} points, rank {1}) disconnected from the server."},
                 {"general_not_found","Player not found."},
                 {"general_invalid_parameter","Invalid parameter."},
-                {"event_ACCURACY","You received {0} points."},
-                {"event_ARENA_WINS","You received {0} points."},
-                {"event_DEATHS_PLAYERS","You received {0} points."},
-                {"event_FOUND_BUILDABLES","You received {0} points."},
-                {"event_FOUND_CRAFTS","You received {0} points."},
-                {"event_FOUND_EXPERIENCE","You received {0} points."},
-                {"event_FOUND_FISHES","You received {0} points."},
-                {"event_FOUND_ITEMS","You received {0} points."},
-                {"event_FOUND_PLANTS","You received {0} points."},
-                {"event_FOUND_RESOURCES","You received {0} points."},
-                {"event_FOUND_THROWABLES","You received {0} points."},
-                {"event_HEADSHOTS","You received {0} points."},
-                {"event_KILLS_ANIMALS","You received {0} points."},
-                {"event_KILLS_PLAYERS","You received {0} points."},
-                {"event_KILLS_ZOMBIES_MEGA","You received {0} points."},
-                {"event_KILLS_ZOMBIES_NORMAL","You received {0} points."},
-                {"event_NONE","You received {0} points."},
-                {"event_TRAVEL_FOOT","You received {0} points."},
-                {"event_TRAVEL_VEHICLE","You received {0} points."}
+                {"event_ACCURACY","You received {0} points. ({1} points)"},
+                {"event_ARENA_WINS","You received {0} points. ({1} points)"},
+                {"event_DEATHS_PLAYERS","You received {0} points. ({1} points)"},
+                {"event_FOUND_BUILDABLES","You received {0} points. ({1} points)"},
+                {"event_FOUND_CRAFTS","You received {0} points. ({1} points)"},
+                {"event_FOUND_EXPERIENCE","You received {0} points. ({1} points)"},
+                {"event_FOUND_FISHES","You received {0} points. ({1} points)"},
+                {"event_FOUND_ITEMS","You received {0} points. ({1} points)"},
+                {"event_FOUND_PLANTS","You received {0} points. ({1} points)"},
+                {"event_FOUND_RESOURCES","You received {0} points. ({1} points)"},
+                {"event_FOUND_THROWABLES","You received {0} points. ({1} points)"},
+                {"event_HEADSHOTS","You received {0} points. ({1} points)"},
+                {"event_KILLS_ANIMALS","You received {0} points. ({1} points)"},
+                {"event_KILLS_PLAYERS","You received {0} points. ({1} points)"},
+                {"event_KILLS_ZOMBIES_MEGA","You received {0} points. ({1} points)"},
+                {"event_KILLS_ZOMBIES_NORMAL","You received {0} points. ({1} points)"},
+                {"event_NONE","You received {0} points. ({1} points)"},
+                {"event_TRAVEL_FOOT","You received {0} points. ({1} points)"},
+                {"event_TRAVEL_VEHICLE","You received {0} points. ({1} points)"}
                 };
             }
         }
@@ -88,29 +88,13 @@ namespace Freenex.FeexRanks
 
         protected override void Unload()
         {
-            if (dicPoints.Count != 0)
-            {
-                FeexRanks.Instance.FeexRanksDatabase.SetPointsQuery(dicPoints);
-                dicPoints.Clear();
-            }
+            dicPoints.Clear();
 
             U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat -= UnturnedPlayerEvents_OnPlayerUpdateStat;
 
             Logger.Log("Freenex's FeexRanks has been unloaded!");
-        }
-
-        void FixedUpdate()
-        {
-            if (State == Rocket.API.PluginState.Loaded && ((DateTime.Now - lastQuery.Value).TotalSeconds > Configuration.Instance.FeexRanksDatabase.QueryInterval))
-            {
-                if (dicPoints.Count != 0)
-                {
-                    FeexRanks.Instance.FeexRanksDatabase.SetPointsQuery(dicPoints);
-                }
-                lastQuery = DateTime.Now;
-            }
         }
 
         private void Events_OnPlayerConnected(UnturnedPlayer player)
@@ -151,7 +135,12 @@ namespace Freenex.FeexRanks
             {
                 if (configEvent.Notify)
                 {
-                    UnturnedChat.Say(player, Translate("event_" + configEvent.EventName, configEvent.Points), configNotificationColor);
+                    int oldPoints;
+                    bool playerExists = dicPoints.TryGetValue(player.CSteamID, out oldPoints);
+                    if (playerExists)
+                    {
+                        UnturnedChat.Say(player, Translate("event_" + configEvent.EventName, configEvent.Points, oldPoints + configEvent.Points), configNotificationColor);
+                    }
                 }
                 UpdatePoints(player, configEvent.Points);
             }
@@ -164,6 +153,7 @@ namespace Freenex.FeexRanks
 
             if (playerExists)
             {
+                FeexRanks.Instance.FeexRanksDatabase.AddPoints(player.CSteamID.ToString(), points);
                 dicPoints[player.CSteamID] += points;
 
                 int newPoints = oldPoints + points;

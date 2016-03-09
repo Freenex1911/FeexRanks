@@ -2,6 +2,7 @@
 using Rocket.Core.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Freenex.FeexRanks
 {
@@ -16,8 +17,7 @@ namespace Freenex.FeexRanks
                 connection.Open();
                 connection.Close();
 
-                CreateCheckTable();
-                CreateCheckView();
+                CreateCheckSchema();
             }
             catch (MySqlException ex)
             {
@@ -29,6 +29,7 @@ namespace Freenex.FeexRanks
                 {
                     Logger.LogException(ex);
                 }
+                FeexRanks.Instance.ForceUnload();
             }
         }
 
@@ -47,18 +48,14 @@ namespace Freenex.FeexRanks
             return connection;
         }
 
+        #region AddUpdatePlayerAsync
         public void AddUpdatePlayer(string steamId, string lastDisplayName)
         {
             try
             {
-                MySqlConnection connection = CreateConnection();
-                MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "INSERT INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES (@steamId,@lastDisplayName) ON DUPLICATE KEY UPDATE lastDisplayName = @lastDisplayName";
-                command.Parameters.AddWithValue("@steamId", steamId);
-                command.Parameters.AddWithValue("@lastDisplayName", lastDisplayName);
-                connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
+                AddUpdatePlayerParameter classAddUpdatePlayerParameter = new AddUpdatePlayerParameter(steamId, lastDisplayName);
+                ThreadPool.QueueUserWorkItem
+                    (new WaitCallback(AddUpdatePlayerThread), classAddUpdatePlayerParameter);
             }
             catch (Exception ex)
             {
@@ -66,24 +63,85 @@ namespace Freenex.FeexRanks
             }
         }
 
-        public void AddPoints(string steamId, int points)
+        private void AddUpdatePlayerThread(object objectAddUpdatePlayerParameter)
         {
             try
             {
+                AddUpdatePlayerParameter classAddUpdatePlayerParameter = (AddUpdatePlayerParameter)objectAddUpdatePlayerParameter;
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=`points`+" + points + " WHERE `steamId`=@steamId";
-                command.Parameters.AddWithValue("@steamId", steamId);
-                command.Parameters.AddWithValue("@points", points);
+                command.CommandText = "INSERT INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES (@steamId,@lastDisplayName) ON DUPLICATE KEY UPDATE lastDisplayName = @lastDisplayName";
+                command.Parameters.AddWithValue("@steamId", classAddUpdatePlayerParameter.steamId);
+                command.Parameters.AddWithValue("@lastDisplayName", classAddUpdatePlayerParameter.lastDisplayName);
                 connection.Open();
                 command.ExecuteNonQuery();
-                connection.Close();
+                connection.Dispose();
             }
             catch (Exception ex)
             {
                 Logger.LogException(ex);
             }
         }
+
+        private class AddUpdatePlayerParameter
+        {
+            public string steamId;
+            public string lastDisplayName;
+
+            public AddUpdatePlayerParameter(string steamId, string lastDisplayName)
+            {
+                this.steamId = steamId;
+                this.lastDisplayName = lastDisplayName;
+            }
+        }
+        #endregion
+
+        #region AddPointsAsync
+        public void AddPoints(string steamId, int points)
+        {
+            try
+            {
+                AddPointsParameter classAddPointsParameter = new AddPointsParameter(steamId, points);
+                ThreadPool.QueueUserWorkItem
+                    (new WaitCallback(AddPointsThread), classAddPointsParameter);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+        }
+
+        private void AddPointsThread(object objectAddPointsParameter)
+        {
+            try
+            {
+                AddPointsParameter classAddPointsParameter = (AddPointsParameter)objectAddPointsParameter;
+                MySqlConnection connection = CreateConnection();
+                MySqlCommand command = connection.CreateCommand();
+                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=`points`+1 WHERE `steamId`=@steamId";
+                command.Parameters.AddWithValue("@steamId", classAddPointsParameter.steamId);
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+        }
+
+        private class AddPointsParameter
+        {
+            public string steamId;
+            public int points;
+
+            public AddPointsParameter(string steamId, int points)
+            {
+                this.steamId = steamId;
+                this.points = points;
+            }
+        }
+        #endregion
 
         public void SetPoints(string steamId, int points)
         {
@@ -91,31 +149,11 @@ namespace Freenex.FeexRanks
             {
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=" + points + " WHERE `steamId`=@steamId";
+                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=" + points.ToString() + " WHERE `steamId`=@steamId";
                 command.Parameters.AddWithValue("@steamId", steamId);
-                command.Parameters.AddWithValue("@points", points);
                 connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-        }
-
-        public void SetPointsQuery(Dictionary<Steamworks.CSteamID, int> dicPoints)
-        {
-            try
-            {
-                MySqlConnection connection = CreateConnection();
-                MySqlCommand command = connection.CreateCommand();
-                foreach (KeyValuePair<Steamworks.CSteamID, int> dicPlayer in dicPoints)
-                {
-                    command.CommandText += "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=" + dicPlayer.Value.ToString() + " WHERE `steamId`='" + dicPlayer.Key.ToString() + "';";
-                }
-                connection.Open();
-                command.ExecuteNonQuery();
+                IAsyncResult result = command.BeginExecuteNonQuery();
+                command.EndExecuteNonQuery(result);
                 connection.Close();
             }
             catch (Exception ex)
@@ -222,7 +260,7 @@ namespace Freenex.FeexRanks
             return output = listOutput.ToArray();
         }
 
-        internal void CreateCheckTable()
+        internal void CreateCheckSchema()
         {
             try
             {
@@ -234,28 +272,6 @@ namespace Freenex.FeexRanks
                 if (test == null)
                 {
                     command.CommandText = "CREATE TABLE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId` VARCHAR(32) NOT NULL, `points` INT(11) NOT NULL DEFAULT '0', `lastDisplayName` varchar(32) NOT NULL, `lastUpdated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`steamId`));";
-                    command.ExecuteNonQuery();
-                }
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-        }
-
-        internal void CreateCheckView()
-        {
-            try
-            {
-                MySqlConnection connection = CreateConnection();
-                MySqlCommand command = connection.CreateCommand();
-                connection.Open();
-                command.CommandText = "SHOW FULL TABLES LIKE '" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "';";
-                object test = command.ExecuteScalar();
-                if (test == null)
-                {
-                    command.CommandText = "CREATE VIEW `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseViewName + "` AS SELECT steamId, points, lastDisplayName, (select count(1) FROM " + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + " b WHERE  b.points > a.points) + 1 AS currentRank FROM " + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + " AS a;";
                     command.ExecuteNonQuery();
                 }
                 connection.Close();
