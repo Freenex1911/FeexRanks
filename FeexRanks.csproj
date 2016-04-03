@@ -79,12 +79,8 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.XML" />
     <Reference Include="Uconomy, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\Uconomy.dll</HintPath>
@@ -98,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandList.cs" />
+    <Compile Include="CommandPoints.cs" />
     <Compile Include="CommandRank.cs" />
     <Compile Include="FeexRanksDatabase.cs" />
     <Compile Include="FeexRanksConfiguration.cs" />

@@ -28,24 +28,30 @@ namespace Freenex.FeexRanks
             get
             {
                 return new TranslationList(){
-                {"rank_self","Your current rank: {1} with {0} points [{2}]"},
-                {"rank_other","{3}'s current rank: {1} with {0} points [{2}]"},
-                {"rank_reset_player","Your points have been reseted."},
-                {"rank_reset_caller","You have reseted the points of {0}."},
-                {"list_1","The top 3 players:"},
-                {"list_2","{1}st: [{2}] {3} ({0} points)"},
-                {"list_3","{1}nd: [{2}] {3} ({0} points)"},
-                {"list_4","{1}th: [{2}] {3} ({0} points)"},
-                {"list_search","Rank {1}: [{2}] {3} ({0} points)"},
-                {"list_search_not_found","Rank not found."},
-                {"level_up","You went up: {1} with {0} points."},
-                {"level_up_kit","You went up and received the kit {0}."},
-                {"level_up_uconomy","You went up and received {0}."},
-                {"level_up_global","{2} went up: {1} with {0} points."},
                 {"general_onjoin","[{2}] {3} ({0} points, rank {1}) connected to the server."},
                 {"general_onleave","[{2}] {3} ({0} points, rank {1}) disconnected from the server."},
                 {"general_not_found","Player not found."},
                 {"general_invalid_parameter","Invalid parameter."},
+                {"rank_self","Your current rank: {1} with {0} points [{2}]"},
+                {"rank_other","{3}'s current rank: {1} with {0} points [{2}]"},
+                {"list_1","The top 3 players:"},
+                {"list_2","{1}st: [{2}] {3} ({0} points)"},
+                {"list_3","{1}nd: [{2}] {3} ({0} points)"},
+                {"list_4","{1}rd: [{2}] {3} ({0} points)"},
+                {"list_search","Rank {1}: [{2}] {3} ({0} points)"},
+                {"list_search_not_found","Rank not found."},
+                {"points_reset_player","Your points have been reset."},
+                {"points_reset_caller","{0}'s points have been reset."},
+                {"points_set_player","Your points have been set to {0}."},
+                {"points_set_caller","{1}'s points have been set to {0}."},
+                {"points_add_player","You received {0} points."},
+                {"points_add_caller","You sent {0} points to {1}."},
+                {"points_remove_player","You lost {0} points."},
+                {"points_remove_caller","You removed {0} points from {1}."},
+                {"level_up","You went up: {1} with {0} points."},
+                {"level_up_kit","You went up and received the kit {0}."},
+                {"level_up_uconomy","You went up and received {0}."},
+                {"level_up_global","{2} went up: {1} with {0} points."},
                 {"event_ACCURACY","You received {0} points. ({1} points)"},
                 {"event_ARENA_WINS","You received {0} points. ({1} points)"},
                 {"event_DEATHS_PLAYERS","You received {0} points. ({1} points)"},
@@ -101,15 +107,15 @@ namespace Freenex.FeexRanks
         {
             FeexRanks.Instance.FeexRanksDatabase.AddUpdatePlayer(player.CSteamID.ToString(), player.DisplayName);
             string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountBySteamID(player.CSteamID.ToString());
-            dicPoints.Add(player.CSteamID, Convert.ToUInt16(rankInfo[0]));
+            dicPoints.Add(player.CSteamID, Convert.ToInt32(rankInfo[0]));
 
             if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnJoin)
             {
-                UnturnedChat.Say(player, FeexRanks.Instance.Translations.Instance.Translate("rank_self", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name), configNotificationColor);
+                UnturnedChat.Say(player, FeexRanks.Instance.Translations.Instance.Translate("rank_self", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[0])).Name), configNotificationColor);
             }
             if (FeexRanks.Instance.Configuration.Instance.EnableRankNotificationOnJoinGlobal)
             {
-                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("general_onjoin", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, player.DisplayName), configNotificationColorJoinLeaveGlobal);
+                UnturnedChat.Say(FeexRanks.Instance.Translations.Instance.Translate("general_onjoin", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[0])).Name, player.DisplayName), configNotificationColorJoinLeaveGlobal);
             }
         }
 

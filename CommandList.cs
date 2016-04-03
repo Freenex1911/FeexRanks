@@ -16,7 +16,7 @@ namespace Freenex.FeexRanks
 
         public string Help
         {
-            get { return "Display ranks or get user by rank"; }
+            get { return "Display top players or get user by rank"; }
         }
 
         public string Syntax
@@ -59,23 +59,23 @@ namespace Freenex.FeexRanks
 
                 if (rankInfo.Length > 0)
                 {
-                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_2", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, rankInfo[2])); }
-                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_2", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, rankInfo[2]), FeexRanks.Instance.configNotificationColor); }
+                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_2", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[0])).Name, rankInfo[2])); }
+                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_2", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[0])).Name, rankInfo[2]), FeexRanks.Instance.configNotificationColor); }
                 }
                 if (rankInfo.Length > 3)
                 {
-                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_3", rankInfo[3], rankInfo[4], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[3])).Name, rankInfo[5])); }
-                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_3", rankInfo[3], rankInfo[4], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[3])).Name, rankInfo[5]), FeexRanks.Instance.configNotificationColor); }
+                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_3", rankInfo[3], rankInfo[4], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[3])).Name, rankInfo[5])); }
+                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_3", rankInfo[3], rankInfo[4], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[3])).Name, rankInfo[5]), FeexRanks.Instance.configNotificationColor); }
                 }
                 if (rankInfo.Length > 6)
                 {
-                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_4", rankInfo[6], rankInfo[7], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[6])).Name, rankInfo[8])); }
-                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_4", rankInfo[6], rankInfo[7], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[6])).Name, rankInfo[8]), FeexRanks.Instance.configNotificationColor); }
+                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_4", rankInfo[6], rankInfo[7], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[6])).Name, rankInfo[8])); }
+                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_4", rankInfo[6], rankInfo[7], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[6])).Name, rankInfo[8]), FeexRanks.Instance.configNotificationColor); }
                 }
             }
             else if (command.Length == 1 && (caller is ConsolePlayer || callerPlayer.HasPermission("list.other")))
             {
-                string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountByRank(Convert.ToUInt16(command[0]));
+                string[] rankInfo = FeexRanks.Instance.FeexRanksDatabase.GetAccountByRank(Convert.ToInt32(command[0]));
                 if (rankInfo[0] == null)
                 {
                     if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_search_not_found")); }
@@ -83,8 +83,8 @@ namespace Freenex.FeexRanks
                 }
                 else
                 {
-                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_search", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, rankInfo[2])); }
-                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_search", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt16(rankInfo[0])).Name, rankInfo[2]), FeexRanks.Instance.configNotificationColor); }
+                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("list_search", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[0])).Name, rankInfo[2])); }
+                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("list_search", rankInfo[0], rankInfo[1], FeexRanks.Instance.GetLevel(Convert.ToInt32(rankInfo[0])).Name, rankInfo[2]), FeexRanks.Instance.configNotificationColor); }
                 }
             }
             else
