@@ -20,7 +20,7 @@ namespace Freenex.FeexRanks
 
         public string Syntax
         {
-            get { return "[<player>] [reset]"; }
+            get { return "[<player>]"; }
         }
 
         public List<string> Aliases
