@@ -29,7 +29,7 @@ namespace Freenex.FeexRanks
                 {
                     Logger.LogException(ex);
                 }
-                FeexRanks.Instance.ForceUnload();
+                FeexRanks.Instance.UnloadPlugin();
             }
         }
 
