@@ -240,6 +240,5 @@ namespace Freenex.FeexRanks
                 UnturnedChat.Say(player, Translate("level_up_uconomy", configLevel.UconomyAmount + fr34kyn01535.Uconomy.Uconomy.Instance.Configuration.Instance.MoneyName), configNotificationColor);
             }
         }
-
     }
 }

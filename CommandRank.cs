@@ -84,6 +84,5 @@ namespace Freenex.FeexRanks
                 else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("general_invalid_parameter"), FeexRanks.Instance.configNotificationColor); }
             }
         }
-
     }
 }

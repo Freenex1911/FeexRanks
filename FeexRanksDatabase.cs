@@ -70,7 +70,7 @@ namespace Freenex.FeexRanks
                 AddUpdatePlayerParameter classAddUpdatePlayerParameter = (AddUpdatePlayerParameter)objectAddUpdatePlayerParameter;
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "INSERT INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES (@steamId,@lastDisplayName) ON DUPLICATE KEY UPDATE lastDisplayName = @lastDisplayName";
+                command.CommandText = "INSERT INTO `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` (`steamId`,`lastDisplayName`) VALUES (@steamId,@lastDisplayName) ON DUPLICATE KEY UPDATE lastDisplayName = @lastDisplayName;";
                 command.Parameters.AddWithValue("@steamId", classAddUpdatePlayerParameter.steamId);
                 command.Parameters.AddWithValue("@lastDisplayName", classAddUpdatePlayerParameter.lastDisplayName);
                 connection.Open();
@@ -118,7 +118,7 @@ namespace Freenex.FeexRanks
                 AddSetPointsParameter classAddSetPointsParameter = (AddSetPointsParameter)objectAddSetPointsParameter;
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=`points`+" + classAddSetPointsParameter.points.ToString() + " WHERE `steamId`=@steamId";
+                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=`points`+" + classAddSetPointsParameter.points.ToString() + " WHERE `steamId`=@steamId;";
                 command.Parameters.AddWithValue("@steamId", classAddSetPointsParameter.steamId);
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -153,7 +153,7 @@ namespace Freenex.FeexRanks
                 AddSetPointsParameter classAddSetPointsParameter = (AddSetPointsParameter)objectAddSetPointsParameter;
                 MySqlConnection connection = CreateConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=" + classAddSetPointsParameter.points.ToString() + " WHERE `steamId`=@steamId";
+                command.CommandText = "UPDATE `" + FeexRanks.Instance.Configuration.Instance.FeexRanksDatabase.DatabaseTableName + "` SET `points`=" + classAddSetPointsParameter.points.ToString() + " WHERE `steamId`=@steamId;";
                 command.Parameters.AddWithValue("@steamId", classAddSetPointsParameter.steamId);
                 connection.Open();
                 command.ExecuteNonQuery();
