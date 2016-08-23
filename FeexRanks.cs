@@ -50,6 +50,7 @@ namespace Freenex.FeexRanks
                 {"points_remove_caller","You removed {0} points from {1}."},
                 {"level_up","You went up: {1} with {0} points."},
                 {"level_up_kit","You went up and received the kit {0}."},
+                {"level_up_rank","You went up and recieved the permission rank {0}." },
                 {"level_up_uconomy","You went up and received {0}."},
                 {"level_up_global","{2} went up: {1} with {0} points."},
                 {"event_ACCURACY","You received {0} points. ({1} points)"},
@@ -185,6 +186,14 @@ namespace Freenex.FeexRanks
                         }
                         catch { }
                     }
+                    if (configLevelNew.PermissionGroupReward)
+                    {
+                        try
+                        {
+                            PermissionGroupReward(configLevelNew, player);
+                        }
+                        catch { }
+                    }
                     if (configLevelNew.UconomyReward)
                     {
                         try
@@ -229,6 +238,22 @@ namespace Freenex.FeexRanks
             if (configLevel.KitNotify)
             {
                 UnturnedChat.Say(player, Translate("level_up_kit", configLevel.KitName), configNotificationColor);
+            }
+        }
+
+        private void PermissionGroupReward(classLevel configLevel, UnturnedPlayer player)
+        {
+            if (configLevel.PermissionGroupName == null)
+            {
+                Logger.LogWarning(string.Format("{0} rank doesn't exist.", configLevel.PermissionGroupName));
+            }
+            else if (configLevel.PermissionGroupName != null)
+            {
+                SDG.Unturned.CommandWindow.ConsoleInput.onInputText.Invoke(string.Format("p add {0} {1}", player.CharacterName, configLevel.PermissionGroupName));
+            }
+            if (configLevel.PermissionGroupNotify)
+            {
+                UnturnedChat.Say(player, Translate("level_up_rank", configLevel.PermissionGroupName), configNotificationColor);
             }
         }
 
