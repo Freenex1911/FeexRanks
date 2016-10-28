@@ -90,7 +90,7 @@ namespace Freenex.FeexRanks
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat += UnturnedPlayerEvents_OnPlayerUpdateStat;
 
-            Logger.Log("Freenex's FeexRanks has been loaded!");
+            Rocket.Core.Logging.Logger.Log("Freenex's FeexRanks has been loaded!");
         }
 
         protected override void Unload()
@@ -101,7 +101,7 @@ namespace Freenex.FeexRanks
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat -= UnturnedPlayerEvents_OnPlayerUpdateStat;
 
-            Logger.Log("Freenex's FeexRanks has been unloaded!");
+            Rocket.Core.Logging.Logger.Log("Freenex's FeexRanks has been unloaded!");
         }
 
         private void Events_OnPlayerConnected(UnturnedPlayer player)
@@ -223,14 +223,14 @@ namespace Freenex.FeexRanks
             fr34kyn01535.Kits.Kit rewardKit = fr34kyn01535.Kits.Kits.Instance.Configuration.Instance.Kits.Where(k => k.Name.ToLower() == configLevel.KitName.ToLower()).FirstOrDefault();
             if (rewardKit == null)
             {
-                Logger.LogWarning("Kit " + configLevel.KitName + " not found.");
+                Rocket.Core.Logging.Logger.LogWarning("Kit " + configLevel.KitName + " not found.");
                 return;
             }
             foreach (fr34kyn01535.Kits.KitItem item in rewardKit.Items)
             {
                 if (!player.GiveItem(item.ItemId, item.Amount))
                 {
-                    Logger.Log(string.Format("Failed giving a item to {0} ({1}, {2})", player.CharacterName, item.ItemId, item.Amount));
+                    Rocket.Core.Logging.Logger.Log(string.Format("Failed giving a item to {0} ({1}, {2})", player.CharacterName, item.ItemId, item.Amount));
                 }
             }
             player.Experience += rewardKit.XP.Value;
@@ -245,7 +245,7 @@ namespace Freenex.FeexRanks
         {
             if (configLevel.PermissionGroupName == null)
             {
-                Logger.LogWarning(string.Format("{0} rank doesn't exist.", configLevel.PermissionGroupName));
+                Rocket.Core.Logging.Logger.LogWarning(string.Format("{0} rank doesn't exist.", configLevel.PermissionGroupName));
             }
             else if (configLevel.PermissionGroupName != null)
             {
