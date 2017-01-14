@@ -1,5 +1,4 @@
 ﻿using Rocket.API.Collections;
-using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Unturned;
 using Rocket.Unturned.Chat;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace Freenex.FeexRanks
 {
@@ -245,11 +245,11 @@ namespace Freenex.FeexRanks
         {
             if (configLevel.PermissionGroupName == null)
             {
-                Rocket.Core.Logging.Logger.LogWarning(string.Format("{0} rank doesn't exist.", configLevel.PermissionGroupName));
+                Logger.LogWarning(string.Format("{0} rank doesn't exist.", configLevel.PermissionGroupName));
             }
             else if (configLevel.PermissionGroupName != null)
             {
-                SDG.Unturned.CommandWindow.ConsoleInput.onInputText.Invoke(string.Format("p add {0} {1}", player.CharacterName, configLevel.PermissionGroupName));
+                SDG.Unturned.CommandWindow.input.onInputText.Invoke(string.Format("p add {0} {1}", player.CharacterName, configLevel.PermissionGroupName));
             }
             if (configLevel.PermissionGroupNotify)
             {
