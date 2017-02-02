@@ -1,5 +1,4 @@
 ﻿using Rocket.API.Collections;
-using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Unturned;
 using Rocket.Unturned.Chat;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Logger = Rocket.Core.Logging.Logger;
 
 using Logger = Rocket.Core.Logging.Logger;
 
@@ -52,6 +52,7 @@ namespace Freenex.FeexRanks
                 {"points_remove_caller","You removed {0} points from {1}."},
                 {"level_up","You went up: {1} with {0} points."},
                 {"level_up_kit","You went up and received the kit {0}."},
+                {"level_up_rank","You went up and recieved the permission rank {0}." },
                 {"level_up_uconomy","You went up and received {0}."},
                 {"level_up_global","{2} went up: {1} with {0} points."},
                 {"event_ACCURACY","You received {0} points. ({1} points)"},
@@ -91,7 +92,7 @@ namespace Freenex.FeexRanks
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat += UnturnedPlayerEvents_OnPlayerUpdateStat;
 
-            Logger.Log("Freenex's FeexRanks has been loaded!");
+            Rocket.Core.Logging.Logger.Log("Freenex's FeexRanks has been loaded!");
         }
 
         protected override void Unload()
@@ -102,7 +103,7 @@ namespace Freenex.FeexRanks
             U.Events.OnPlayerDisconnected -= Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerUpdateStat -= UnturnedPlayerEvents_OnPlayerUpdateStat;
 
-            Logger.Log("Freenex's FeexRanks has been unloaded!");
+            Rocket.Core.Logging.Logger.Log("Freenex's FeexRanks has been unloaded!");
         }
 
         private void Events_OnPlayerConnected(UnturnedPlayer player)
@@ -187,6 +188,14 @@ namespace Freenex.FeexRanks
                         }
                         catch { }
                     }
+                    if (configLevelNew.PermissionGroupReward)
+                    {
+                        try
+                        {
+                            PermissionGroupReward(configLevelNew, player);
+                        }
+                        catch { }
+                    }
                     if (configLevelNew.UconomyReward)
                     {
                         try
@@ -216,14 +225,14 @@ namespace Freenex.FeexRanks
             fr34kyn01535.Kits.Kit rewardKit = fr34kyn01535.Kits.Kits.Instance.Configuration.Instance.Kits.Where(k => k.Name.ToLower() == configLevel.KitName.ToLower()).FirstOrDefault();
             if (rewardKit == null)
             {
-                Logger.LogWarning("Kit " + configLevel.KitName + " not found.");
+                Rocket.Core.Logging.Logger.LogWarning("Kit " + configLevel.KitName + " not found.");
                 return;
             }
             foreach (fr34kyn01535.Kits.KitItem item in rewardKit.Items)
             {
                 if (!player.GiveItem(item.ItemId, item.Amount))
                 {
-                    Logger.Log(string.Format("Failed giving a item to {0} ({1}, {2})", player.CharacterName, item.ItemId, item.Amount));
+                    Rocket.Core.Logging.Logger.Log(string.Format("Failed giving a item to {0} ({1}, {2})", player.CharacterName, item.ItemId, item.Amount));
                 }
             }
             player.Experience += rewardKit.XP.Value;
@@ -231,6 +240,25 @@ namespace Freenex.FeexRanks
             if (configLevel.KitNotify)
             {
                 UnturnedChat.Say(player, Translate("level_up_kit", configLevel.KitName), configNotificationColor);
+            }
+        }
+
+        private void PermissionGroupReward(classLevel configLevel, UnturnedPlayer player)
+        {
+            Rocket.Core.Permissions.RocketPermissionsManager a = new Rocket.Core.Permissions.RocketPermissionsManager();
+            try
+            {
+                a.GetGroup(configLevel.PermissionGroupName);
+            }
+            catch (Exception)
+            {
+                Logger.LogWarning("Group " + configLevel.PermissionGroupName + " does not exist. Group was not given to player.");
+                return;
+            }
+            a.AddPlayerToGroup(configLevel.PermissionGroupName, player);
+            if (configLevel.PermissionGroupNotify)
+            {
+                UnturnedChat.Say(player, Translate("level_up_rank", configLevel.PermissionGroupName), configNotificationColor);
             }
         }
 

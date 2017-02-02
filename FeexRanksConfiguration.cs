@@ -53,7 +53,7 @@ namespace Freenex.FeexRanks
                 new classLevel() { Points = 0, Name = "Pig"},
                 new classLevel() { Points = 100, Name = "Small Zombie", UconomyReward = true, UconomyNotify = true, UconomyAmount = 100},
                 new classLevel() { Points = 200, Name = "Zombie", KitReward = true, KitNotify = true, KitName = "Zombie"},
-                new classLevel() { Points = 500, Name = "Giant Zombie", KitReward = true, KitNotify = true, KitName = "Giant Zombie", UconomyReward = true, UconomyNotify = false, UconomyAmount = 200}
+                new classLevel() { Points = 500, Name = "Giant Zombie", KitReward = true, KitNotify = true, KitName = "Giant Zombie", PermissionGroupReward = true, PermissionGroupNotify = true, PermissionGroupName = "VIP", UconomyReward = true, UconomyNotify = false, UconomyAmount = 200}
             };
         }
     }
@@ -84,6 +84,9 @@ namespace Freenex.FeexRanks
         public bool KitReward = false;
         public bool KitNotify = true;
         public string KitName = string.Empty;
+        public bool PermissionGroupReward = false;
+        public bool PermissionGroupNotify = true;
+        public string PermissionGroupName = string.Empty;
         public bool UconomyReward = false;
         public bool UconomyNotify = true;
         public decimal UconomyAmount = 0;
