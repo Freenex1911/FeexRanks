@@ -243,14 +243,17 @@ namespace Freenex.FeexRanks
 
         private void PermissionGroupReward(classLevel configLevel, UnturnedPlayer player)
         {
-            if (configLevel.PermissionGroupName == null)
+            Rocket.Core.Permissions.RocketPermissionsManager a = new Rocket.Core.Permissions.RocketPermissionsManager();
+            try
             {
-                Logger.LogWarning(string.Format("{0} rank doesn't exist.", configLevel.PermissionGroupName));
+                a.GetGroup(configLevel.PermissionGroupName);
             }
-            else if (configLevel.PermissionGroupName != null)
+            catch (Exception)
             {
-                SDG.Unturned.CommandWindow.input.onInputText.Invoke(string.Format("p add {0} {1}", player.CharacterName, configLevel.PermissionGroupName));
+                Logger.LogWarning("Group " + configLevel.PermissionGroupName + " does not exist. Group was not given to player.");
+                return;
             }
+            a.AddPlayerToGroup(configLevel.PermissionGroupName, player);
             if (configLevel.PermissionGroupNotify)
             {
                 UnturnedChat.Say(player, Translate("level_up_rank", configLevel.PermissionGroupName), configNotificationColor);
