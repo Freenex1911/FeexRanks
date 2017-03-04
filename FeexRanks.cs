@@ -243,7 +243,7 @@ namespace Freenex.FeexRanks
 
         private void PermissionGroupReward(classLevel configLevel, UnturnedPlayer player)
         {
-            Rocket.Core.Permissions.RocketPermissionsManager a = new Rocket.Core.Permissions.RocketPermissionsManager();
+            Rocket.Core.Permissions.RocketPermissionsManager a = Rocket.Core.R.Instance.GetComponent<Rocket.Core.Permissions.RocketPermissionsManager>();
             try
             {
                 a.GetGroup(configLevel.PermissionGroupName);
