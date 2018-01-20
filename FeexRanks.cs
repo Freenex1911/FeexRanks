@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Logger = Rocket.Core.Logging.Logger;
+using Rocket.Core;
 
 namespace Freenex.FeexRanks
 {
@@ -243,17 +244,15 @@ namespace Freenex.FeexRanks
 
         private void PermissionGroupReward(classLevel configLevel, UnturnedPlayer player)
         {
-            Rocket.Core.Permissions.RocketPermissionsManager a = Rocket.Core.R.Instance.GetComponent<Rocket.Core.Permissions.RocketPermissionsManager>();
-            try
-            {
-                a.GetGroup(configLevel.PermissionGroupName);
-            }
-            catch (Exception)
+            var a = R.Permissions.GetGroup(configLevel.PermissionGroupName);
+            if (a == null)
             {
                 Logger.LogWarning("Group " + configLevel.PermissionGroupName + " does not exist. Group was not given to player.");
                 return;
             }
-            a.AddPlayerToGroup(configLevel.PermissionGroupName, player);
+            
+            R.Permissions.AddPlayerToGroup(configLevel.PermissionGroupName, player);
+            
             if (configLevel.PermissionGroupNotify)
             {
                 UnturnedChat.Say(player, Translate("level_up_rank", configLevel.PermissionGroupName), configNotificationColor);
