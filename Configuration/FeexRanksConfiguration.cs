@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using Freenex.FeexRanks.Database;
 using Rocket.API;
 
-namespace Freenex.FeexRanks
+namespace Freenex.FeexRanks.Configuration
 {
     public class FeexRanksConfiguration : IRocketPluginConfiguration
     {

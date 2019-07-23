@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using fr34kyn01535.Kits;
 using fr34kyn01535.Uconomy;
+using Freenex.FeexRanks.Configuration;
 using Rocket.API;
 using Rocket.API.Collections;
 using Rocket.Core;
@@ -14,6 +15,8 @@ using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
+using DatabaseManager = Freenex.FeexRanks.Database.DatabaseManager;
+using Level = Freenex.FeexRanks.Configuration.Level;
 using Logger = Rocket.Core.Logging.Logger;
 
 namespace Freenex.FeexRanks

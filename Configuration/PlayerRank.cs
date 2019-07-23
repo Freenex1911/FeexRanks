@@ -1,4 +1,4 @@
-namespace Freenex.FeexRanks
+namespace Freenex.FeexRanks.Configuration
 {
     public sealed class PlayerRank
     {

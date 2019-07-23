@@ -116,20 +116,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DatabaseConfig.cs" />
-    <Compile Include="EQueryType.cs" />
-    <Compile Include="Event.cs" />
-    <Compile Include="Level.cs" />
-    <Compile Include="CommandList.cs" />
-    <Compile Include="CommandPoints.cs" />
-    <Compile Include="CommandRank.cs" />
-    <Compile Include="DatabaseManager.cs" />
-    <Compile Include="FeexRanksConfiguration.cs" />
+    <Compile Include="Database\DatabaseConfig.cs" />
+    <Compile Include="Database\EQueryType.cs" />
+    <Compile Include="Configuration\Event.cs" />
+    <Compile Include="Configuration\Level.cs" />
+    <Compile Include="Commands\CommandList.cs" />
+    <Compile Include="Commands\CommandPoints.cs" />
+    <Compile Include="Commands\CommandRank.cs" />
+    <Compile Include="Database\DatabaseManager.cs" />
+    <Compile Include="Configuration\FeexRanksConfiguration.cs" />
     <Compile Include="FeexRanks.cs" />
-    <Compile Include="MySqlQueryParams.cs" />
-    <Compile Include="PlayerRank.cs" />
+    <Compile Include="Database\MySqlQueryParams.cs" />
+    <Compile Include="Configuration\PlayerRank.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Row.cs" />
+    <Compile Include="Database\Row.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Libraries\BouncyCastle.Crypto.dll">

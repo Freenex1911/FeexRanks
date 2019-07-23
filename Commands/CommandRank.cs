@@ -4,7 +4,7 @@ using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 using Steamworks;
 
-namespace Freenex.FeexRanks
+namespace Freenex.FeexRanks.Commands
 {
     public class CommandRank : IRocketCommand
     {

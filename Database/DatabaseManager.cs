@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Freenex.FeexRanks.Configuration;
 using I18N.West;
 using MySql.Data.MySqlClient;
 using Rocket.Core.Logging;
 
-namespace Freenex.FeexRanks
+namespace Freenex.FeexRanks.Database
 {
     public class DatabaseManager
     {

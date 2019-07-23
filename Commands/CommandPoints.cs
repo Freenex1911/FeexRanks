@@ -3,7 +3,7 @@ using Rocket.API;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 
-namespace Freenex.FeexRanks
+namespace Freenex.FeexRanks.Commands
 {
     public class CommandPoints : IRocketCommand
     {

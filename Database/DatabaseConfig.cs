@@ -1,4 +1,4 @@
-namespace Freenex.FeexRanks
+namespace Freenex.FeexRanks.Database
 {
     public class DatabaseConfig
     {

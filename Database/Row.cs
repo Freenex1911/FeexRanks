@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Freenex.FeexRanks
+namespace Freenex.FeexRanks.Database
 {
     public sealed class Row
     {

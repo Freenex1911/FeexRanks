@@ -3,7 +3,7 @@ using System.Linq;
 using Rocket.API;
 using Rocket.Unturned.Chat;
 
-namespace Freenex.FeexRanks
+namespace Freenex.FeexRanks.Commands
 {
     public class CommandList : IRocketCommand
     {
