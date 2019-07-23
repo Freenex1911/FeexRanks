@@ -1,87 +1,79 @@
-﻿using Rocket.API;
-using Rocket.Core.Logging;
+﻿using System.Collections.Generic;
+using Rocket.API;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
-using System.Collections.Generic;
+using Steamworks;
 
 namespace Freenex.FeexRanks
 {
     public class CommandRank : IRocketCommand
     {
-        public string Name
-        {
-            get { return "rank"; }
-        }
+        public string Name => "rank";
 
-        public string Help
-        {
-            get { return "Display current rank or get user by name"; }
-        }
+        public string Help => "Display current rank or get user by name";
 
-        public string Syntax
-        {
-            get { return "[<player>]"; }
-        }
+        public string Syntax => "[<player>]";
 
-        public List<string> Aliases
-        {
-            get { return new List<string>(); }
-        }
+        public List<string> Aliases => new List<string>();
 
-        public AllowedCaller AllowedCaller
-        {
-            get { return AllowedCaller.Both; }
-        }
+        public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions
-        {
-            get
+        public List<string> Permissions =>
+            new List<string>
             {
-                return new List<string>()
-                {
-                    "rank",
-                    "rank.other"
-                };
-            }
-        }
+                "rank",
+                "rank.other"
+            };
 
         public void Execute(IRocketPlayer caller, params string[] command)
         {
-            UnturnedPlayer callerPlayer = null;
-            if (caller is ConsolePlayer == false) { callerPlayer = (UnturnedPlayer)caller; }
+            switch (command.Length)
+            {
+                case 0:
+                {
+                    if (FeexRanks.DicPoints.TryGetValue(new CSteamID(ulong.Parse(caller.Id)), out var playerPoints))
+                        UnturnedChat.Say(caller,
+                            FeexRanks.Instance.Translations.Instance.Translate("rank_self", playerPoints,
+                                FeexRanks.Instance.FeexRanksDatabase.GetRankBySteamId(caller.Id),
+                                FeexRanks.Instance.GetLevel(playerPoints).Name),
+                            FeexRanks.Instance.configNotificationColor);
+                    break;
+                }
 
-            if (command.Length == 0 && caller is ConsolePlayer == false)
-            {
-                int playerPoints;
-                bool playerExists = FeexRanks.dicPoints.TryGetValue(callerPlayer.CSteamID, out playerPoints);
-                if (playerExists)
+                case 1:
                 {
-                    UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("rank_self", playerPoints, FeexRanks.Instance.FeexRanksDatabase.GetRankBySteamID(callerPlayer.CSteamID.ToString()), FeexRanks.Instance.GetLevel(playerPoints).Name), FeexRanks.Instance.configNotificationColor);
-                }
-            }
-            else if (command.Length == 1 && (caller is ConsolePlayer || callerPlayer.HasPermission("rank.other")))
-            {
-                UnturnedPlayer otherPlayer = UnturnedPlayer.FromName(command[0]);
-                if (otherPlayer == null)
-                {
-                    if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("general_not_found")); }
-                    else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("general_not_found"), FeexRanks.Instance.configNotificationColor); }
-                }
-                else
-                {
-                    int playerPoints;
-                    bool playerExists = FeexRanks.dicPoints.TryGetValue(otherPlayer.CSteamID, out playerPoints);
-                    if (playerExists)
+                    if (!caller.HasPermission("rank.other"))
                     {
-                        if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("rank_other", playerPoints, FeexRanks.Instance.FeexRanksDatabase.GetRankBySteamID(otherPlayer.CSteamID.ToString()), FeexRanks.Instance.GetLevel(playerPoints).Name, otherPlayer.DisplayName)); }
-                        else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("rank_other", playerPoints, FeexRanks.Instance.FeexRanksDatabase.GetRankBySteamID(otherPlayer.CSteamID.ToString()), FeexRanks.Instance.GetLevel(playerPoints).Name, otherPlayer.DisplayName), FeexRanks.Instance.configNotificationColor); }
+                        UnturnedChat.Say(caller, "No Perms");
+                        return;
                     }
+
+                    var otherPlayer = UnturnedPlayer.FromName(command[0]);
+                    if (otherPlayer == null)
+                    {
+                        UnturnedChat.Say(caller, FeexRanks.Instance.Translate("general_not_found"),
+                            FeexRanks.Instance.configNotificationColor);
+                    }
+                    else
+                    {
+                        if (FeexRanks.DicPoints.TryGetValue(otherPlayer.CSteamID, out var playerPoints))
+                            UnturnedChat.Say(caller,
+                                FeexRanks.Instance.Translate("rank_other", playerPoints,
+                                    FeexRanks.Instance.FeexRanksDatabase.GetRankBySteamId(
+                                        otherPlayer.CSteamID.ToString()),
+                                    FeexRanks.Instance.GetLevel(playerPoints).Name, otherPlayer.DisplayName),
+                                FeexRanks.Instance.configNotificationColor);
+                    }
+
+                    break;
                 }
-            }
-            else
-            {
-                if (caller is ConsolePlayer) { Logger.Log(FeexRanks.Instance.Translations.Instance.Translate("general_invalid_parameter")); }
-                else { UnturnedChat.Say(caller, FeexRanks.Instance.Translations.Instance.Translate("general_invalid_parameter"), FeexRanks.Instance.configNotificationColor); }
+
+                default:
+                {
+                    UnturnedChat.Say(caller, FeexRanks.Instance.Translate("general_invalid_parameter"),
+                        FeexRanks.Instance.configNotificationColor);
+                    break;
+                }
             }
         }
     }

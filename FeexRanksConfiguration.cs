@@ -1,6 +1,5 @@
-﻿using Rocket.API;
-using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Collections.Generic;
+using Rocket.API;
 
 namespace Freenex.FeexRanks
 {
@@ -14,11 +13,9 @@ namespace Freenex.FeexRanks
         public string NotificationColor;
         public string NotificationColorGlobal;
         public string NotificationColorJoinLeaveGlobal;
-        public classDatabase FeexRanksDatabase;
-        [XmlArrayItem(ElementName = "Event")]
-        public List<classEvent> Events;
-        [XmlArrayItem(ElementName = "Level")]
-        public List<classLevel> Level;
+        public DatabaseConfig FeexRanksDatabaseConfig;
+        public List<Event> Events;
+        public List<Level> Level;
 
         public void LoadDefaults()
         {
@@ -31,64 +28,38 @@ namespace Freenex.FeexRanks
             NotificationColorGlobal = "Gray";
             NotificationColorJoinLeaveGlobal = "Green";
 
-            FeexRanksDatabase = new classDatabase()
+            FeexRanksDatabaseConfig = new DatabaseConfig
             {
                 DatabaseAddress = "localhost",
                 DatabaseUsername = "unturned",
                 DatabasePassword = "password",
                 DatabaseName = "unturned",
                 DatabaseTableName = "ranks",
-                DatabasePort = 3306,
+                DatabasePort = 3306
             };
 
-            Events = new List<classEvent>()
+            Events = new List<Event>
             {
-                new classEvent { EventName = "KILLS_ZOMBIES_NORMAL", Notify = false, Points = 10 },
-                new classEvent { EventName = "KILLS_ZOMBIES_MEGA", Notify = true, Points = 50 },
-                new classEvent { EventName = "KILLS_PLAYERS", Notify = true, Points = 60 }
+                new Event {EventName = "KILLS_ZOMBIES_NORMAL", Notify = false, Points = 10},
+                new Event {EventName = "KILLS_ZOMBIES_MEGA", Notify = true, Points = 50},
+                new Event {EventName = "KILLS_PLAYERS", Notify = true, Points = 60}
             };
 
-            Level = new List<classLevel>()
+            Level = new List<Level>
             {
-                new classLevel() { Points = 0, Name = "Pig"},
-                new classLevel() { Points = 100, Name = "Small Zombie", UconomyReward = true, UconomyNotify = true, UconomyAmount = 100},
-                new classLevel() { Points = 200, Name = "Zombie", KitReward = true, KitNotify = true, KitName = "Zombie"},
-                new classLevel() { Points = 500, Name = "Giant Zombie", KitReward = true, KitNotify = true, KitName = "Giant Zombie", PermissionGroupReward = true, PermissionGroupNotify = true, PermissionGroupName = "VIP", UconomyReward = true, UconomyNotify = false, UconomyAmount = 200}
+                new Level {Points = 0, Name = "Pig"},
+                new Level
+                {
+                    Points = 100, Name = "Small Zombie", UconomyReward = true, UconomyNotify = true, UconomyAmount = 100
+                },
+                new Level {Points = 200, Name = "Zombie", KitReward = true, KitNotify = true, KitName = "Zombie"},
+                new Level
+                {
+                    Points = 500, Name = "Giant Zombie", KitReward = true, KitNotify = true, KitName = "Giant Zombie",
+                    PermissionGroupReward = true, PermissionGroupNotify = true, PermissionGroupName = "VIP",
+                    UconomyReward = true, UconomyNotify = false, UconomyAmount = 200
+                }
             };
         }
-    }
-
-    public class classDatabase
-    {
-        public string DatabaseAddress;
-        public string DatabaseUsername;
-        public string DatabasePassword;
-        public string DatabaseName;
-        public string DatabaseTableName;
-        public int DatabasePort;
-    }
-
-    public class classEvent
-    {
-        public classEvent() { }
-        public string EventName;
-        public bool Notify;
-        public int Points;
-    }
-
-    public class classLevel
-    {
-        public classLevel() { }
-        public int Points = 0;
-        public string Name = string.Empty;
-        public bool KitReward = false;
-        public bool KitNotify = true;
-        public string KitName = string.Empty;
-        public bool PermissionGroupReward = false;
-        public bool PermissionGroupNotify = true;
-        public string PermissionGroupName = string.Empty;
-        public bool UconomyReward = false;
-        public bool UconomyNotify = true;
-        public decimal UconomyAmount = 0;
     }
 }
