@@ -39,6 +39,8 @@ namespace Freenex.FeexRanks
                 {"general_invalid_parameter", "Invalid parameter."},
                 {"rank_self", "Your current rank: {1} with {0} points [{2}]"},
                 {"rank_other", "{3}'s current rank: {1} with {0} points [{2}]"},
+                {"ranking_empty", "Ranking is empty."},
+                {"nan", "{0} is not a number."},
                 {"list_1", "The top 3 players:"},
                 {"list_2", "{1}st: [{2}] {3} ({0} points)"},
                 {"list_3", "{1}nd: [{2}] {3} ({0} points)"},

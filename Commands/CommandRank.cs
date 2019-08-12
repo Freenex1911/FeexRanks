@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Rocket.API;
+using Rocket.Core;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 using Steamworks;
@@ -44,7 +45,8 @@ namespace Freenex.FeexRanks.Commands
                 {
                     if (!caller.HasPermission("rank.other"))
                     {
-                        UnturnedChat.Say(caller, "No Perms");
+                        UnturnedChat.Say(caller, R.Translate("command_no_permission"),
+                            FeexRanks.Instance.configNotificationColor);
                         return;
                     }
 

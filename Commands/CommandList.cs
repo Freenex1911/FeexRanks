@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Rocket.API;
+using Rocket.Core;
 using Rocket.Unturned.Chat;
 
 namespace Freenex.FeexRanks.Commands
@@ -36,7 +37,8 @@ namespace Freenex.FeexRanks.Commands
 
                     if (topRanks.Count == 0)
                     {
-                        UnturnedChat.Say(caller, "No Ranking");
+                        UnturnedChat.Say(caller, FeexRanks.Instance.Translate("ranking_empty"),
+                            FeexRanks.Instance.configNotificationColor);
                         return;
                     }
 
@@ -56,13 +58,15 @@ namespace Freenex.FeexRanks.Commands
                 {
                     if (!caller.HasPermission("list.other"))
                     {
-                        UnturnedChat.Say(caller, "No perms");
+                        UnturnedChat.Say(caller, R.Translate("command_no_permission"),
+                            FeexRanks.Instance.configNotificationColor);
                         return;
                     }
 
                     if (!int.TryParse(command[0], out var rank))
                     {
-                        UnturnedChat.Say(caller, "NaN");
+                        UnturnedChat.Say(caller, FeexRanks.Instance.Translate("nan", command[0]),
+                            FeexRanks.Instance.configNotificationColor);
                         return;
                     }
 
