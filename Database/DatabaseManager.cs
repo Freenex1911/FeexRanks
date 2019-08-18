@@ -52,7 +52,7 @@ namespace Freenex.FeexRanks.Database
         {
             ExecuteQuery(EQueryType.NonQuery,
                 $"INSERT INTO `{FeexRanks.Instance.Configuration.Instance.FeexRanksDatabaseConfig.DatabaseTableName}` (`steamId`,`lastDisplayName`) VALUES (@steamId,@lastDisplayName) ON DUPLICATE KEY UPDATE lastDisplayName = @lastDisplayName;",
-                new MySqlQueryParams("@lastDisplayName", lastDisplayName), new MySqlQueryParams("@steamId", steamId));
+                new MySqlParameter("@lastDisplayName", lastDisplayName), new MySqlParameter("@steamId", steamId));
         }
 
         public void AddPoints(string steamId, int points)
@@ -71,7 +71,7 @@ namespace Freenex.FeexRanks.Database
         {
             ExecuteQuery(EQueryType.NonQuery,
                 $"UPDATE `{FeexRanks.Instance.Configuration.Instance.FeexRanksDatabaseConfig.DatabaseTableName}` SET `points`=`points`+{points} WHERE `steamId`=@steamId;",
-                new MySqlQueryParams("@steamId", steamId));
+                new MySqlParameter("@steamId", steamId));
         }
 
         public void SetPoints(string steamId, int points)
@@ -90,14 +90,14 @@ namespace Freenex.FeexRanks.Database
         {
             ExecuteQuery(EQueryType.NonQuery,
                 $"UPDATE `{FeexRanks.Instance.Configuration.Instance.FeexRanksDatabaseConfig.DatabaseTableName}` SET `points`={points} WHERE `steamId`=@steamId;",
-                new MySqlQueryParams("@steamId", steamId));
+                new MySqlParameter("@steamId", steamId));
         }
 
         public PlayerRank GetAccountBySteamId(string steamId)
         {
             var readerResult = (List<Row>) ExecuteQuery(EQueryType.Reader,
                 $"SELECT * FROM (SELECT t.steamId, t.points, t.lastDisplayName, @`rownum` := @`rownum` + 1 AS currentRank FROM `{FeexRanks.Instance.Configuration.Instance.FeexRanksDatabaseConfig.DatabaseTableName}` t JOIN (SELECT @`rownum` := 0) r ORDER BY t.points DESC) x WHERE x.steamId = @steamId;",
-                new MySqlQueryParams("@steamId", steamId));
+                new MySqlParameter("@steamId", steamId));
 
             return readerResult?.Select(k => new PlayerRank
             {
@@ -123,7 +123,7 @@ namespace Freenex.FeexRanks.Database
             var output = 0;
             var result = ExecuteQuery(EQueryType.Scalar,
                 $"SELECT `currentRank` FROM (SELECT t.steamId, t.points, @`rownum` := @`rownum` + 1 AS currentRank FROM `{FeexRanks.Instance.Configuration.Instance.FeexRanksDatabaseConfig.DatabaseTableName}` t JOIN (SELECT @`rownum` := 0) r ORDER BY t.points DESC) x WHERE x.steamId = @steamId;",
-                new MySqlQueryParams("@steamId", steamId));
+                new MySqlParameter("@steamId", steamId));
 
             if (result != null) int.TryParse(result.ToString(), out output);
 
@@ -152,66 +152,69 @@ namespace Freenex.FeexRanks.Database
                     $"CREATE TABLE `{FeexRanks.Instance.Configuration.Instance.FeexRanksDatabaseConfig.DatabaseTableName}` (`steamId` VARCHAR(32) NOT NULL, `points` INT(32) NOT NULL DEFAULT '0', `lastDisplayName` varchar(32) NOT NULL, `lastUpdated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`steamId`));");
         }
 
-        private object ExecuteQuery(EQueryType queryType, string query, params MySqlQueryParams[] parameters)
+        private object ExecuteQuery(EQueryType queryType, string query, params MySqlParameter[] parameters)
         {
-            var connection = CreateConnection();
-            var readerResult = new List<Row>();
             object result = null;
             MySqlDataReader reader = null;
 
-            try
+            using (var connection = CreateConnection())
             {
-                var command = connection.CreateCommand();
-                command.CommandText = query;
-
-                foreach (var param in parameters)
-                    command.Parameters.AddWithValue(param.ParamName, param.ParamValue);
-
-                connection.Open();
-                switch (queryType)
+                try
                 {
-                    case EQueryType.Reader:
-                        reader = command.ExecuteReader();
-                        while (reader.Read())
-                            try
-                            {
-                                var values = new Dictionary<string, object>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = query;
 
-                                for (var i = 0; i < reader.FieldCount; i++)
+                    foreach (var parameter in parameters)
+                        command.Parameters.Add(parameter);
+
+                    connection.Open();
+                    switch (queryType)
+                    {
+                        case EQueryType.Reader:
+                            var readerResult = new List<Row>();
+
+                            reader = command.ExecuteReader();
+                            while (reader.Read())
+                                try
                                 {
-                                    var columnName = reader.GetName(i);
-                                    values.Add(columnName, reader[columnName]);
+                                    var values = new Dictionary<string, object>();
+
+                                    for (var i = 0; i < reader.FieldCount; i++)
+                                    {
+                                        var columnName = reader.GetName(i);
+                                        values.Add(columnName, reader[columnName]);
+                                    }
+
+                                    readerResult.Add(new Row {Values = values});
+                                }
+                                catch (Exception ex)
+                                {
+                                    Logger.LogError(
+                                        $"The following query threw an error during reader execution:\nQuery: \"{query}\"\nError: {ex.Message}");
                                 }
 
-                                readerResult.Add(new Row {Values = values});
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.LogError(
-                                    $"The following query threw an error during reader execution:\nQuery: \"{query}\"\nError: {ex.Message}");
-                            }
-
-                        break;
-                    case EQueryType.Scalar:
-                        result = command.ExecuteScalar();
-                        break;
-                    case EQueryType.NonQuery:
-                        result = command.ExecuteNonQuery();
-                        break;
+                            result = readerResult;
+                            break;
+                        case EQueryType.Scalar:
+                            result = command.ExecuteScalar();
+                            break;
+                        case EQueryType.NonQuery:
+                            result = command.ExecuteNonQuery();
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex);
+                }
+                finally
+                {
+                    reader?.Close();
+                    connection.Close();
                 }
             }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-            finally
-            {
-                reader?.Close();
 
-                connection.Close();
-            }
-
-            return queryType == EQueryType.Reader ? readerResult : result;
+            return result;
         }
     }
 }
