@@ -120,7 +120,6 @@
     <Compile Include="Database\DatabaseManager.cs" />
     <Compile Include="Configuration\FeexRanksConfiguration.cs" />
     <Compile Include="FeexRanks.cs" />
-    <Compile Include="Database\MySqlQueryParams.cs" />
     <Compile Include="Configuration\PlayerRank.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Database\Row.cs" />
